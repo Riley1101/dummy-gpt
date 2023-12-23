@@ -1,0 +1,24 @@
+<h1>{{.Name}}</h1>
+
+<table>
+  <tr>
+    <th>Name</th>
+    <th>DataType</th>
+  </tr>
+		{{ range .Fields }}
+			<tr>
+				<td>{{ .Name }}</td>
+				<td>{{ .Datatype }}</td>
+			</tr>
+		{{ end }}
+</table>
+
+<hr>
+
+<form>
+     <form method="POST">
+        <label>JSON</label><br />
+        <textarea name="message"></textarea><br />
+        <input type="submit">
+    </form>
+</form>
