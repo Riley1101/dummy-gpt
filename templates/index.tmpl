@@ -1,41 +1,44 @@
-<h1>{{.Name}}</h1>
+{{define "title"}}Home{{end}}
 
-<pre>
-{
-  "table_name": "blog_posts",
-  "fields": [
-    {"name": "id", "datatype": "UUID", "constraints": ["PRIMARY KEY", "DEFAULT uuid_generate_v4()"]},
-    {"name": "title", "datatype": "VARCHAR(255)", "constraints": ["NOT NULL"]},
-    {"name": "content", "datatype": "TEXT"},
-    {"name": "author", "datatype": "VARCHAR(100)", "constraints": ["NOT NULL"]},
-    {"name": "timestamp", "datatype": "TIMESTAMP", "constraints": ["DEFAULT CURRENT_TIMESTAMP"]},
-    {"name": "tags", "datatype": "VARCHAR(255)[]", "constraints": ["DEFAULT '{}'"]}
-  ]
-}
-</pre>
+{{define "main"}}
+    <h1>{{.Name}}</h1>
 
-<table>
-  <tr>
-    <th>Name</th>
-    <th>DataType</th>
-  </tr>
-		{{ range .Fields }}
-			<tr>
-				<td>{{ .Name }}</td>
-				<td>{{ .Datatype }}</td>
-			</tr>
-		{{ end }}
-</table>
+    <pre>
+    {
+      "table_name": "blog_posts",
+      "fields": [
+        {"name": "id", "datatype": "UUID", "constraints": ["PRIMARY KEY", "DEFAULT uuid_generate_v4()"]},
+        {"name": "title", "datatype": "VARCHAR(255)", "constraints": ["NOT NULL"]},
+        {"name": "content", "datatype": "TEXT"},
+        {"name": "author", "datatype": "VARCHAR(100)", "constraints": ["NOT NULL"]},
+        {"name": "timestamp", "datatype": "TIMESTAMP", "constraints": ["DEFAULT CURRENT_TIMESTAMP"]},
+        {"name": "tags", "datatype": "VARCHAR(255)[]", "constraints": ["DEFAULT '{}'"]}
+      ]
+    }
+    </pre>
 
-<hr>
+    <table>
+      <tr>
+        <th>Name</th>
+        <th>DataType</th>
+      </tr>
+            {{ range .Fields }}
+                <tr>
+                    <td>{{ .Name }}</td>
+                    <td>{{ .Datatype }}</td>
+                </tr>
+            {{ end }}
+    </table>
 
-<h2>Create</h2>
-<form>
-     <form method="POST">
-        <label>JSON</label><br />
-        <textarea name="schema"></textarea><br />
-        <input type="submit">
+    <hr>
+
+    <h2>Create</h2>
+    <form >
+         <form method="POST">
+            <label>JSON</label><br />
+            <textarea name="schema"></textarea><br />
+            <input type="submit">
+        </form>
     </form>
-</form>
-
+{{end}}
 
