@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"dummygpt/common"
 	"dummygpt/endpoints"
+	"fmt"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -26,16 +27,16 @@ func main() {
 	godotenv.Load(".env")
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
-	// connStr := fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable",
-	//	user, password, host, port, dbname)
-	// db, _ := sql.Open("postgres", connStr)
+	connStr := fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable",
+		user, password, host, port, dbname)
+	db, _ := sql.Open("postgres", connStr)
 
 	// public
 	r.Group(func(r chi.Router) {
 		r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 			w.Write([]byte("welcome!"))
 		})
-		endpoints.InitAuthEndpoint(r)
+		endpoints.InitAuthEndpoint(r, db)
 	})
 
 	// admin

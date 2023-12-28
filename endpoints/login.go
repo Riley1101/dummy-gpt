@@ -1,6 +1,7 @@
 package endpoints
 
 import (
+	"database/sql"
 	"html/template"
 	"net/http"
 
@@ -12,7 +13,34 @@ type LoginForm struct {
 	Password string `json:"password"`
 }
 
-func InitAuthEndpoint(r chi.Router) {
+type AuthHandler struct {
+	DB *sql.DB
+}
+
+func (h *AuthHandler) Register(r chi.Router) {
+	r.Get("/register", func(w http.ResponseWriter, r *http.Request) {
+		templates := []string{
+			"templates/register.tmpl",
+			"templates/base.tmpl",
+		}
+
+		ts, err := template.ParseFiles(templates...)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		err = ts.ExecuteTemplate(w, "base", nil)
+	})
+	r.Post("/register", func(w http.ResponseWriter, r *http.Request) {
+		register := LoginForm{
+			Username: r.FormValue("username"),
+			Password: r.FormValue("password"),
+		}
+		w.Write([]byte(register.Username))
+	})
+}
+
+func (h *AuthHandler) Login(r chi.Router) {
 	r.Get("/login", func(w http.ResponseWriter, r *http.Request) {
 		templates := []string{
 			"templates/login.tmpl",
@@ -24,9 +52,7 @@ func InitAuthEndpoint(r chi.Router) {
 			return
 		}
 		err = ts.ExecuteTemplate(w, "base", nil)
-		return
 	})
-
 	r.Post("/login", func(w http.ResponseWriter, r *http.Request) {
 		success := true
 		//		formValues := LoginForm{
@@ -34,7 +60,6 @@ func InitAuthEndpoint(r chi.Router) {
 		//			Password: r.FormValue("password"),
 		//		}
 		if success {
-			// set cookie
 			cookie := http.Cookie{
 				Name:     "token",
 				Value:    "Hello world!",
@@ -48,9 +73,14 @@ func InitAuthEndpoint(r chi.Router) {
 			http.Redirect(w, r, "/admin", http.StatusSeeOther)
 		}
 	})
-
 	r.Get("/logout", func(w http.ResponseWriter, r *http.Request) {
-
 		w.Write([]byte("logout"))
 	})
+
+}
+
+func InitAuthEndpoint(r chi.Router, db *sql.DB) {
+	authHandler := AuthHandler{DB: db}
+	authHandler.Register(r)
+	authHandler.Login(r)
 }
