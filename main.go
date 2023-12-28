@@ -3,13 +3,11 @@ package main
 import (
 	"database/sql"
 	"dummygpt/common"
-	//"dummygpt/routes"
-	"html/template"
-	"net/http"
-
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	_ "github.com/lib/pq"
+	"html/template"
+	"net/http"
 )
 
 const (
@@ -48,34 +46,15 @@ func main() {
 	}
 
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		//		exists, err := routes.CheckTableExists(db, table)
-		//		if exists {
-		//			res, err := routes.AlterTable(db, table)
-		//			if err != nil {
-		//				fmt.Println(err)
-		//			}
-		//			fmt.Println(res)
-		//
-		//		} else {
-		//			res, err := routes.CreateTable(db, table)
-		//			if err != nil {
-		//				fmt.Println(err)
-		//			}
-		//			fmt.Println(res)
-		//		}
-
-		//		if err != nil {
-		//			panic(err)
-		//		}
-
-		schema := common.SchemaForm{
-			Message: r.FormValue("message"),
+		formBody := common.SchemaForm{
+			Schema: r.FormValue("schema"),
 		}
-
-		dbSchema := common.DbSchema{}
-		dbSchema.ParseSchema(schema.Message)
-		dbSchema.PrintSchema("users")
-
+		dbSchema := common.DbSchema{
+			Name: "users",
+		}
+		dbSchema.ParseSchema(formBody.Schema)
+		dbSchema.DescribeSchema()
+		dbSchema.GenerateQuery()
 		tmpl := template.Must(template.ParseFiles("templates/index.tmpl"))
 		tmpl.Execute(w, table)
 	})

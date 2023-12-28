@@ -6,8 +6,9 @@ import (
 )
 
 type Field struct {
-	Name     string
-	Datatype string
+	Name        string
+	Datatype    string
+	Constraints []string
 }
 
 type Table struct {
@@ -16,40 +17,40 @@ type Table struct {
 }
 
 type SchemaForm struct {
-	Message string `json:"message"`
+	Schema string `json:"schema"`
 }
 
 type DbSchema struct {
+	Name   string
 	Fields []Field
 }
 
 func (dbSchema *DbSchema) ParseSchema(str string) {
 	err := json.Unmarshal([]byte(str), &dbSchema)
-	fmt.Println(dbSchema)
 	if err != nil {
 		fmt.Println(err)
 	}
 }
 
-func (dbSchema *DbSchema) PrintSchema(name string) string {
-	var str string
-	str += fmt.Sprintf(`
-	CREATE TABLE IF NOT EXISTS %s (`, name)
+func (dbSchema *DbSchema) DescribeSchema() string {
+	var desc string
 	for _, field := range dbSchema.Fields {
-		str += fmt.Sprintf("%s %s,", field.Name, field.Datatype)
+		desc += fmt.Sprintf(" %s %s %s \n", field.Name, field.Datatype, field.Constraints)
 	}
-	str = str[:len(str)-1]
-	str += `);`
-	fmt.Println(str)
-	return str
+	return desc
 }
 
-func ParseDBSchema(str string) DbSchema {
-	var jsonSchema DbSchema
-	err := json.Unmarshal([]byte(str), &jsonSchema)
-	fmt.Println(jsonSchema)
-	if err != nil {
-		fmt.Println(err)
+func (DbSchema *DbSchema) GenerateQuery() string {
+	var query string
+	query = fmt.Sprintf("CREATE TABLE %s (", DbSchema.Name)
+	for _, field := range DbSchema.Fields {
+		column := fmt.Sprintf("%s %s", field.Name, field.Datatype)
+		for _, constraint := range field.Constraints {
+			column += fmt.Sprintf(" %s", constraint)
+		}
+		query += fmt.Sprintf("%s,", column)
 	}
-	return jsonSchema
+	query = query[:len(query)-1]
+	query += ");"
+	return query
 }

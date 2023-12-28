@@ -1,5 +1,19 @@
 <h1>{{.Name}}</h1>
 
+<pre>
+{
+  "table_name": "blog_posts",
+  "fields": [
+    {"name": "id", "datatype": "UUID", "constraints": ["PRIMARY KEY", "DEFAULT uuid_generate_v4()"]},
+    {"name": "title", "datatype": "VARCHAR(255)", "constraints": ["NOT NULL"]},
+    {"name": "content", "datatype": "TEXT"},
+    {"name": "author", "datatype": "VARCHAR(100)", "constraints": ["NOT NULL"]},
+    {"name": "timestamp", "datatype": "TIMESTAMP", "constraints": ["DEFAULT CURRENT_TIMESTAMP"]},
+    {"name": "tags", "datatype": "VARCHAR(255)[]", "constraints": ["DEFAULT '{}'"]}
+  ]
+}
+</pre>
+
 <table>
   <tr>
     <th>Name</th>
@@ -15,10 +29,13 @@
 
 <hr>
 
+<h2>Create</h2>
 <form>
      <form method="POST">
         <label>JSON</label><br />
-        <textarea name="message"></textarea><br />
+        <textarea name="schema"></textarea><br />
         <input type="submit">
     </form>
 </form>
+
+
