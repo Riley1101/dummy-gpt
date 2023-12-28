@@ -3,12 +3,12 @@ package main
 import (
 	"database/sql"
 	"dummygpt/common"
-	"fmt"
+	"dummygpt/endpoints"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	"github.com/go-chi/jwtauth/v5"
+	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 )
 
@@ -23,6 +23,7 @@ const (
 var db *sql.DB
 
 func main() {
+	godotenv.Load(".env")
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 	// connStr := fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable",
@@ -34,58 +35,15 @@ func main() {
 		r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 			w.Write([]byte("welcome!"))
 		})
+		endpoints.InitAuthEndpoint(r)
 	})
+
 	// admin
 	r.Group(func(r chi.Router) {
-		auth := common.Auth{}
-		common.InitAuth(&auth)
-		r.Use(jwtauth.Verifier(auth.Token))
-		r.Use(jwtauth.Authenticator(auth.Token))
+		r.Use(common.SessionAuthMiddleware)
 		r.Get("/admin", func(w http.ResponseWriter, r *http.Request) {
-			_, claims, _ := jwtauth.FromContext(r.Context())
-			w.Write([]byte(fmt.Sprintf("protected area. hi %v", claims["user_id"])))
+			w.Write([]byte("admin"))
 		})
 	})
 	http.ListenAndServe(":3000", r)
 }
-
-//table := common.Table{
-//	Name: "users",
-//	Fields: []common.Field{
-//		{
-//			Name:     "id",
-//			Datatype: "integer",
-//		},
-//		{
-//			Name:     "name",
-//			Datatype: "varchar(255)",
-//		},
-//		{
-//			Name:     "email",
-//			Datatype: "varchar(255)",
-//		},
-//	},
-//}
-
-//r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-//	const userid = "Arkar"
-//	formBody := common.SchemaForm{
-//		Schema: r.FormValue("schema"),
-//	}
-//	dbSchema := common.DbSchema{
-//		Name: "users",
-//	}
-//	dbSchema.ParseSchema(formBody.Schema)
-//	dbSchema.DescribeSchema()
-//	dbSchema.GenerateQuery()
-//	files := []string{
-//		"templates/index.tmpl",
-//		"templates/base.tmpl",
-//	}
-//	ts, err := template.ParseFiles(files...)
-//	if err != nil {
-//		http.Error(w, err.Error(), http.StatusInternalServerError)
-//		return
-//	}
-//	err = ts.ExecuteTemplate(w, "base", table)
-//})
