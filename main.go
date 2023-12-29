@@ -5,12 +5,11 @@ import (
 	"dummygpt/common"
 	"dummygpt/endpoints"
 	"fmt"
-	"net/http"
-
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
+	"net/http"
 )
 
 const (
@@ -46,5 +45,6 @@ func main() {
 			w.Write([]byte("admin"))
 		})
 	})
+
 	http.ListenAndServe(":3000", r)
 }

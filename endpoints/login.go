@@ -2,6 +2,9 @@ package endpoints
 
 import (
 	"database/sql"
+	c "dummygpt/common"
+	"dummygpt/database"
+	"fmt"
 	"html/template"
 	"net/http"
 
@@ -9,34 +12,96 @@ import (
 )
 
 type LoginForm struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
+	Username string `json:"username" validate:"required"`
+	Password string `json:"password" validate:"required"`
+}
+
+type RegisterForm struct {
+	Username string `json:"username" validate:"required"`
+	Password string `json:"password" validate:"required"`
+	Email    string `json:"email" validate:"required"`
 }
 
 type AuthHandler struct {
-	DB *sql.DB
+	UserDb *database.UserDb
+}
+
+type AuthResponse struct {
+	Success bool   `json:"success"`
+	Message string `json:"message"`
 }
 
 func (h *AuthHandler) Register(r chi.Router) {
-	r.Get("/register", func(w http.ResponseWriter, r *http.Request) {
-		templates := []string{
-			"templates/register.tmpl",
-			"templates/base.tmpl",
-		}
+	templates := []string{
+		"templates/register.tmpl",
+		"templates/base.tmpl",
+	}
+	ts, err := template.ParseFiles(templates...)
 
-		ts, err := template.ParseFiles(templates...)
+	r.Get("/register", func(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 		err = ts.ExecuteTemplate(w, "base", nil)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 	})
+
 	r.Post("/register", func(w http.ResponseWriter, r *http.Request) {
-		register := LoginForm{
+
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		register := RegisterForm{
 			Username: r.FormValue("username"),
 			Password: r.FormValue("password"),
+			Email:    r.FormValue("email"),
 		}
-		w.Write([]byte(register.Username))
+		_, err := c.ValidateStruct(register)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		hashedPassword, err := c.HashPassword(register.Password)
+
+		userExists, err := h.UserDb.CheckUserExists(register.Username)
+
+		if err != nil {
+			fmt.Println(err)
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		if userExists {
+			err = ts.ExecuteTemplate(w, "base", AuthResponse{
+				Success: true,
+				Message: "User created successfully",
+			})
+			return
+		}
+
+		dbUser := database.User{
+			Username: register.Username,
+			Password: hashedPassword,
+			Email:    register.Email,
+		}
+
+		err = h.UserDb.CreateUser(&dbUser)
+		if err != nil {
+			fmt.Println(err)
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		err = ts.ExecuteTemplate(w, "base", AuthResponse{
+			Success: true,
+			Message: "User created successfully",
+		})
 	})
 }
 
@@ -52,7 +117,9 @@ func (h *AuthHandler) Login(r chi.Router) {
 			return
 		}
 		err = ts.ExecuteTemplate(w, "base", nil)
+		fmt.Println(err)
 	})
+
 	r.Post("/login", func(w http.ResponseWriter, r *http.Request) {
 		success := true
 		//		formValues := LoginForm{
@@ -80,7 +147,11 @@ func (h *AuthHandler) Login(r chi.Router) {
 }
 
 func InitAuthEndpoint(r chi.Router, db *sql.DB) {
-	authHandler := AuthHandler{DB: db}
+	UserDb := database.UserDb{DB: db}
+	authHandler := AuthHandler{
+		UserDb: &UserDb,
+	}
+	authHandler.UserDb.CreateUserTable()
 	authHandler.Register(r)
 	authHandler.Login(r)
 }
