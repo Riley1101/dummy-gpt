@@ -1,0 +1,28 @@
+{
+  "table_name": "pets",
+  "fields": [
+    { "name": "id", "datatype": "int", "constraints": ["primary_key"] },
+    { "name": "name", "datatype": "VARCHAR(255)", "constraints": ["not_null"] },
+    {
+      "name": "species",
+      "datatype": "VARCHAR(255)",
+      "constraints": ["not_null"]
+    },
+    {
+      "name": "age",
+      "datatype": "INTEGER",
+      "constraints": ["not_null", "check(age > 0)"]
+    },
+    { "name": "color", "datatype": "VARCHAR(50)" },
+    {
+      "name": "price",
+      "datatype": "DECIMAL(10,2)",
+      "constraints": ["check(price > 0)"]
+    },
+    {
+      "name": "availability",
+      "datatype": "BOOLEAN",
+      "constraints": ["not_null"]
+    }
+  ]
+}

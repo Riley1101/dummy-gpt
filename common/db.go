@@ -3,6 +3,7 @@ package common
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 )
 
 type Field struct {
@@ -28,7 +29,7 @@ type DbSchema struct {
 func (dbSchema *DbSchema) ParseSchema(str string) {
 	err := json.Unmarshal([]byte(str), &dbSchema)
 	if err != nil {
-		fmt.Println(err)
+		log.Fatalf("Error parsing schema: %v", err)
 	}
 }
 
@@ -52,5 +53,6 @@ func (DbSchema *DbSchema) GenerateQuery() string {
 	}
 	query = query[:len(query)-1]
 	query += ");"
+	log.Println(query)
 	return query
 }

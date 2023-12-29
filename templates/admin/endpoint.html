@@ -10,7 +10,7 @@
       <th></th>
       <th></th>
     </tr>
-    {{ range .}}
+    {{ range .Data}}
     <tr>
       <td>{{ .ID}}</td>
       <td>{{ .Name}}</td>
@@ -24,6 +24,38 @@
     </tr>
     {{ end }}
   </table>
+  <div class="mt-12 block">
+    <pre>
+    {
+      "table_name": "blog_posts",
+      "fields": [
+        {"name": "id", "datatype": "UUID", "constraints": ["PRIMARY KEY", "DEFAULT uuid_generate_v4()"]},
+        {"name": "title", "datatype": "VARCHAR(255)", "constraints": ["NOT NULL"]},
+        {"name": "content", "datatype": "TEXT"},
+        {"name": "author", "datatype": "VARCHAR(100)", "constraints": ["NOT NULL"]},
+        {"name": "timestamp", "datatype": "TIMESTAMP", "constraints": ["DEFAULT CURRENT_TIMESTAMP"]},
+        {"name": "tags", "datatype": "VARCHAR(255)[]", "constraints": ["DEFAULT '{}'"]}
+      ]
+    }
+    </pre>
+    {{ if .Sql}}
+    <code class="max-w-lg block overflow-x-auto">{{ .Sql}}</code>
+    {{end}}
+
+    <form method="POST">
+      <label for="endpointName">Endpoint Name</label><br />
+      <input
+        placeholder="Endpoint Name"
+        name="endpointName"
+        id="endpointName"
+      />
+      <br />
+      <label for="scheam">Schema</label><br />
+      <textarea name="schema" id="schema" placeholder="Enter schema"></textarea>
+      <br />
+      <button type="submit">Create Endpoint</button>
+    </form>
+  </div>
 </div>
 
 {{end}} {{define "error"}} {{end}}

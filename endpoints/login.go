@@ -4,8 +4,7 @@ import (
 	"database/sql"
 	c "dummygpt/common"
 	"dummygpt/database"
-	"fmt"
-	"html/template"
+	"log"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -32,30 +31,17 @@ type AuthResponse struct {
 }
 
 func (h *AuthHandler) Register(r chi.Router) {
-	templates := []string{
+
+	var templates = []string{
 		"templates/register.html",
 		"templates/base.html",
 	}
-	ts, err := template.ParseFiles(templates...)
 
 	r.Get("/register", func(w http.ResponseWriter, r *http.Request) {
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		err = ts.ExecuteTemplate(w, "base", nil)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
+		c.RenderTemplate(w, templates, nil)
 	})
 
 	r.Post("/register", func(w http.ResponseWriter, r *http.Request) {
-
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
 
 		register := RegisterForm{
 			Username: r.FormValue("username"),
@@ -72,15 +58,15 @@ func (h *AuthHandler) Register(r chi.Router) {
 		userExists, err := h.UserDb.CheckUserExists(register.Username)
 
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err)
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
 		if userExists {
-			err = ts.ExecuteTemplate(w, "base", AuthResponse{
-				Success: true,
-				Message: "User created successfully",
+			c.RenderTemplate(w, templates, AuthResponse{
+				Success: false,
+				Message: "User already exists",
 			})
 			return
 		}
@@ -93,15 +79,15 @@ func (h *AuthHandler) Register(r chi.Router) {
 
 		err = h.UserDb.CreateUser(&dbUser)
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err)
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-
-		err = ts.ExecuteTemplate(w, "base", AuthResponse{
+		c.RenderTemplate(w, templates, AuthResponse{
 			Success: true,
-			Message: "User created successfully",
+			Message: "User created",
 		})
+
 	})
 }
 
@@ -111,13 +97,7 @@ func (h *AuthHandler) Login(r chi.Router) {
 			"templates/login.html",
 			"templates/base.html",
 		}
-		ts, err := template.ParseFiles(templates...)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		err = ts.ExecuteTemplate(w, "base", nil)
-		fmt.Println(err)
+		c.RenderTemplate(w, templates, nil)
 	})
 
 	r.Post("/login", func(w http.ResponseWriter, r *http.Request) {

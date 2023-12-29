@@ -2,13 +2,25 @@ package endpoints
 
 import (
 	"database/sql"
+	c "dummygpt/common"
 	"dummygpt/database"
-	"fmt"
 	"html/template"
+	"log"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
 )
+
+type TemplateData struct {
+	Data interface{}
+	Err  error
+	Sql  interface{}
+}
+
+type EndpointForm struct {
+	EndpointName string `json:"endpoint_name" validate:"required"`
+	Schema       string `json:"schema" validate:"required"`
+}
 
 type EndpointHandler struct {
 	EndpointDB *database.EndpointDB
@@ -26,16 +38,34 @@ func (e *EndpointHandler) Endpoints(r chi.Router) {
 
 	r.Get("/endpoints", func(w http.ResponseWriter, r *http.Request) {
 		endpoints, err := e.EndpointDB.GetEndpointsByOwner(owner)
-		fmt.Println(endpoints)
 		if err != nil {
 			panic(err)
 		}
-		ts.ExecuteTemplate(w, "base", endpoints)
-
+		ts.ExecuteTemplate(w, "base", TemplateData{
+			Data: endpoints,
+			Err:  err,
+			Sql:  nil,
+		})
 	})
 
 	r.Post("/endpoints", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("post endpoints"))
+		formData := EndpointForm{
+			EndpointName: r.FormValue("endpointName"),
+			Schema:       r.FormValue("schema"),
+		}
+		c.ValidateStruct(formData)
+		dbSchema := c.DbSchema{
+			Name: formData.EndpointName,
+		}
+		dbSchema.ParseSchema(formData.Schema)
+		dbSchema.DescribeSchema()
+		query := dbSchema.GenerateQuery()
+		log.Println(query)
+		ts.ExecuteTemplate(w, "base", TemplateData{
+			Data: nil,
+			Err:  err,
+			Sql:  query,
+		})
 	})
 }
 
