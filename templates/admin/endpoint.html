@@ -1,0 +1,29 @@
+{{define "title"}} Endpoints {{end}} {{define "main"}}
+<h1>Endpoints by user</h1>
+
+<div>
+  <table>
+    <tr>
+      <th>ID</th>
+      <th>Name</th>
+      <th>isPublic</th>
+      <th></th>
+      <th></th>
+    </tr>
+    {{ range .}}
+    <tr>
+      <td>{{ .ID}}</td>
+      <td>{{ .Name}}</td>
+      <td>{{ .IsPublic}}</td>
+      <td>
+        <button>Edit</button>
+      </td>
+      <td>
+        <button>Delete</button>
+      </td>
+    </tr>
+    {{ end }}
+  </table>
+</div>
+
+{{end}} {{define "error"}} {{end}}

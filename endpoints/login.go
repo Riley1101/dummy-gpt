@@ -33,8 +33,8 @@ type AuthResponse struct {
 
 func (h *AuthHandler) Register(r chi.Router) {
 	templates := []string{
-		"templates/register.tmpl",
-		"templates/base.tmpl",
+		"templates/register.html",
+		"templates/base.html",
 	}
 	ts, err := template.ParseFiles(templates...)
 
@@ -108,8 +108,8 @@ func (h *AuthHandler) Register(r chi.Router) {
 func (h *AuthHandler) Login(r chi.Router) {
 	r.Get("/login", func(w http.ResponseWriter, r *http.Request) {
 		templates := []string{
-			"templates/login.tmpl",
-			"templates/base.tmpl",
+			"templates/login.html",
+			"templates/base.html",
 		}
 		ts, err := template.ParseFiles(templates...)
 		if err != nil {

@@ -1,38 +1,49 @@
 package endpoints
 
-import "fmt"
+import (
+	"database/sql"
+	"dummygpt/database"
+	"fmt"
+	"html/template"
+	"net/http"
 
-type Column struct {
-	Name     string
-	Datatype string
+	"github.com/go-chi/chi/v5"
+)
+
+type EndpointHandler struct {
+	EndpointDB *database.EndpointDB
 }
 
-type Schema struct {
-	Name    string
-	columns []Column
-}
+var owner = 1
 
-type Endpoint struct {
-	id     int
-	Url    string
-	Name   string
-	Schema Schema
-}
+func (e *EndpointHandler) Endpoints(r chi.Router) {
+	templates := []string{"templates/admin/endpoint.html", "templates/base.html"}
+	ts, err := template.ParseFiles(templates...)
 
-func (e *Endpoint) GetUrl() string {
-	return e.Url
-}
-
-func (e *Endpoint) CreateDB() {
-	query := fmt.Sprintf("CREATE DATABASE %s", e.Schema.Name)
-	fmt.Println(query)
-}
-
-func (e *Endpoint) CreateTable() {
-	for _, column := range e.Schema.columns {
-		query := fmt.Sprintf("CREATE TABLE %s (%s %s)", e.Schema.Name, column.Name, column.Datatype)
-		fmt.Println(query)
+	if err != nil {
+		panic(err)
 	}
+
+	r.Get("/endpoints", func(w http.ResponseWriter, r *http.Request) {
+		endpoints, err := e.EndpointDB.GetEndpointsByOwner(owner)
+		fmt.Println(endpoints)
+		if err != nil {
+			panic(err)
+		}
+		ts.ExecuteTemplate(w, "base", endpoints)
+
+	})
+
+	r.Post("/endpoints", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("post endpoints"))
+	})
 }
 
-
+func InitEndpoints(r chi.Router, db *sql.DB) {
+	endPoint := database.EndpointDB{DB: db}
+	endpointHandler := &EndpointHandler{
+		EndpointDB: &endPoint,
+	}
+	endpointHandler.EndpointDB.CreateEndpointTable()
+	endpointHandler.Endpoints(r)
+}

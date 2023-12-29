@@ -5,11 +5,12 @@ import (
 	"dummygpt/common"
 	"dummygpt/endpoints"
 	"fmt"
+	"net/http"
+
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
-	"net/http"
 )
 
 const (
@@ -41,8 +42,12 @@ func main() {
 	// admin
 	r.Group(func(r chi.Router) {
 		r.Use(common.SessionAuthMiddleware)
-		r.Get("/admin", func(w http.ResponseWriter, r *http.Request) {
-			w.Write([]byte("admin"))
+		r.Route("/admin", func(r chi.Router) {
+			r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+				w.Write([]byte("Main admin"))
+			})
+			endpoints.InitEndpoints(r, db)
+
 		})
 	})
 

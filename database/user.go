@@ -23,7 +23,6 @@ type UserQuery struct {
 }
 
 var UserQuerySQL = UserQuery{
-
 	CreateUserTable: `CREATE TABLE IF NOT EXISTS users (
 		id SERIAL PRIMARY KEY,
 		username VARCHAR(255) UNIQUE NOT NULL,

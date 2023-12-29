@@ -1,9 +1,8 @@
-{{define "title"}}Home{{end}}
+{{define "title"}} Home {{end}} {{define "main"}}
 
-{{define "main"}}
-    <h1>{{.Name}}</h1>
+<h1>{{.Name}}</h1>
 
-    <pre>
+<pre>
     {
       "table_name": "blog_posts",
       "fields": [
@@ -15,30 +14,30 @@
         {"name": "tags", "datatype": "VARCHAR(255)[]", "constraints": ["DEFAULT '{}'"]}
       ]
     }
-    </pre>
+    </pre
+>
 
-    <table>
-      <tr>
-        <th>Name</th>
-        <th>DataType</th>
-      </tr>
-            {{ range .Fields }}
-                <tr>
-                    <td>{{ .Name }}</td>
-                    <td>{{ .Datatype }}</td>
-                </tr>
-            {{ end }}
-    </table>
+<table>
+  <tr>
+    <th>Name</th>
+    <th>DataType</th>
+  </tr>
+  {{ range .Fields }}
+  <tr>
+    <td>{{ .Name }}</td>
+    <td>{{ .Datatype }}</td>
+  </tr>
+  {{ end }}
+</table>
 
-    <hr>
+<hr />
 
-    <h2>Create</h2>
-    <form >
-         <form method="POST">
-            <label>JSON</label><br />
-            <textarea name="schema"></textarea><br />
-            <input type="submit">
-        </form>
-    </form>
+<h2>Create</h2>
+<form>
+  <form method="POST">
+    <label>JSON</label><br />
+    <textarea name="schema"></textarea><br />
+    <input type="submit" />
+  </form>
+</form>
 {{end}}
-
